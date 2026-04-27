@@ -1,8 +1,35 @@
-# Kiwoom Stock Data Collector
+# Kiwoom Quant Stock Screener
 
-Python project for collecting and screening KOSPI/KOSDAQ stocks with Kiwoom OpenAPI+.
+Python project for finding KOSPI/KOSDAQ stocks that pass a custom quant screening rule built on Kiwoom OpenAPI+ data.
 
-The collector logs in through Kiwoom OpenAPI+, requests index and daily candle data, calculates a daily fluctuation estimation indicator, and writes matching stock codes to a local result file.
+This is not a generic stock-data collector. Kiwoom OpenAPI+ is used as the data source, but the core portfolio value is the author's own rule-based quant condition. The program requests market index data and stock daily candles, calculates custom volatility indicators, compares each stock against market-level movement, and writes only the stock codes that satisfy the screening conditions.
+
+## Core Idea
+
+The project screens stocks with a custom **Daily Fluctuation Estimation Indicator (DFEI)**:
+
+```text
+DFEI = (daily high - daily low) / (daily close - daily open)
+```
+
+The condition logic uses this indicator to detect stocks whose daily movement pattern satisfies the author's predefined quant rule instead of simply listing all available stocks.
+
+The screening flow is:
+
+1. Log in through Kiwoom OpenAPI+.
+2. Request KOSPI/KOSDAQ index daily data.
+3. Calculate market-level DFEI and moving fluctuation thresholds.
+4. Request each stock's daily candle data.
+5. Calculate each stock's DFEI over the configured lookback period.
+6. Compare stock-level movement against the market-derived threshold.
+7. Save only stocks that pass every condition.
+
+Implemented condition sets:
+
+- `Conditional/Condition3_main.py`: 40-day baseline condition that filters out stocks with excessive volatility relative to the market threshold.
+- `Conditional/Condition4_Beta.py`: 600-day beta condition that searches for stocks with sustained movement above the custom threshold.
+
+Generated outputs are therefore **custom quant-screened stock candidates**, not raw stock lists.
 
 ## Security Cleanup
 
@@ -82,4 +109,4 @@ Generated stock-screening results are written to `files/` by default and ignored
 
 ## Notes
 
-This repository is for data collection and screening experiments only. It does not include trading-order logic, account credentials, or Kiwoom login information.
+This repository is for custom quant screening experiments only. It does not include trading-order logic, account credentials, or Kiwoom login information.
